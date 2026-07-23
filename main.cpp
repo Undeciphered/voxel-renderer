@@ -26,7 +26,7 @@ int main() {
         return 1;
     }
 
-    //make this window the curetn context
+    //make this window the current context
     glfwMakeContextCurrent(window);
 
     //keep the windo open
@@ -34,6 +34,9 @@ int main() {
 
         //check for poll events
         glfwPollEvents();
+
+        glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
 
         //swap the front and back buffers
         glfwSwapBuffers(window);
