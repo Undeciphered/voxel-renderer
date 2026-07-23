@@ -141,7 +141,7 @@ int main() {
         //check for poll events
         glfwPollEvents();
 
-        glClearColor(0.1f, 0.2f, 0.4f, 1.0f);
+        glClearColor(0.1f, 0.8f, 0.4f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
 
