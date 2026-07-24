@@ -22,7 +22,7 @@ const char* fragmentShaderSource = R"(
 
     void main()
     {
-        FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        FragColor = vec4(1.0, 0.0, 1.0, 1.0);
     }
 )";
 
@@ -69,8 +69,14 @@ int main() {
 
     //three point of the triangle
     float vertices[] = {
-        0.0f, 0.5f, 0.0f,
+        //first triangle
+        -0.5f, 0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+
+        //second triangle
+        -0.5f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
         0.5f, -0.5f, 0.0f
     };
 
@@ -150,7 +156,7 @@ int main() {
 
         //draw triangle
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         //swap front and back buffers
         glfwSwapBuffers(window);
