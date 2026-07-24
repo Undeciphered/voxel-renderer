@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <chrono>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -55,7 +56,7 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(
         800, //width
         600, //height
-        "openGL cube yipeeeee!",
+        "rotating cube yipeeeee!",
         nullptr,
         nullptr
     );
@@ -216,18 +217,6 @@ int main() {
     glm::mat4 view = glm::mat4(1.0f);
     glm::mat4 projection = glm::mat4(1.0f);
 
-    model = glm::rotate(
-        model,
-        glm::radians(25.0f),
-        glm::vec3(1.0f, 0.0f, 0.0f)
-    );
-
-    model = glm::rotate(
-        model,
-        glm::radians(-35.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
     view = glm::translate(
         view,
         glm::vec3(0.0f, 0.0f, -3.0f)
@@ -240,8 +229,27 @@ int main() {
         100.0f
     );
 
+    float rotation = 0.0f;
+
+    auto previousTime = std::chrono::high_resolution_clock::now();
+
     //main render loop
     while (!glfwWindowShouldClose(window)) {
+
+        //calculate the time since last rotation and
+        //rotate it the amount it would have rotated in that time
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        float deltaTime = std::chrono::duration<float>(currentTime - previousTime).count();
+        previousTime = currentTime;
+        rotation += 50.0f * deltaTime;
+
+        model = glm::mat4(1.0f);
+
+        model = glm::rotate(
+            model,
+            glm::radians(rotation),
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
 
         //check for poll events
         glfwPollEvents();
