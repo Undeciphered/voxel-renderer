@@ -5,24 +5,26 @@
 //vertex shader
 const char* vertexShaderSource = R"(
     #version 330 core
-
     layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aColor; 
 
-    void main() 
-    {
+    flat out vec3 ourColor; // 1. Added 'flat' here
+
+    void main() {
         gl_Position = vec4(aPos, 1.0);
+        ourColor = aColor; 
     }
 )";
 
 //fragment shader
 const char* fragmentShaderSource = R"(
     #version 330 core
-
     out vec4 FragColor;
+    
+    flat in vec3 ourColor; // 2. Added 'flat' here
 
-    void main()
-    {
-        FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    void main() {
+        FragColor = vec4(ourColor, 1.0); 
     }
 )";
 
@@ -44,7 +46,7 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(
         800, //width
         600, //height
-        "my first openGL triangle yipeeeee!",
+        "multiple openGL triangles yipeeeee!",
         nullptr,
         nullptr
     );
@@ -67,17 +69,17 @@ int main() {
         return 1;
     }
 
-    //three point of the triangle
     float vertices[] = {
-        //first triangle
-        -0.5f, 0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
+        // Positions          // Colors (RGB)
+        // First Triangle (Red)
+        -0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 
+        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 
+        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 1.0f, 
 
-        //second triangle
-        -0.5f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f
+        // Second Triangle (Blue)
+        -0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f, 
+        0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f, 
+        0.5f, -0.5f, 0.0f,      1.0f, 0.0f, 0.0f  
     };
 
     //creat vertex array object (VAO)
@@ -103,14 +105,13 @@ int main() {
     );
 
     //tell OpenGL how our vertex data is organized
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        3 * sizeof(float),
-        (void*)0
-    );
+    // 1. Position Attribute (Location 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // 2. Color Attribute (Location 1)
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     //enable the vertex attribute
     glEnableVertexAttribArray(0);
@@ -147,7 +148,7 @@ int main() {
         //check for poll events
         glfwPollEvents();
 
-        glClearColor(0.1f, 0.8f, 0.4f, 1.0f);
+        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
 
