@@ -2,17 +2,26 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 //vertex shader
 const char* vertexShaderSource = R"(
     #version 330 core
-    layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec3 aColor; 
 
-    flat out vec3 ourColor; // 1. Added 'flat' here
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aColor;
+
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
+
+    flat out vec3 ourColor;
 
     void main() {
-        gl_Position = vec4(aPos, 1.0);
-        ourColor = aColor; 
+        gl_Position = projection * view * model * vec4(aPos, 1.0);
+        ourColor = aColor;
     }
 )";
 
@@ -21,7 +30,7 @@ const char* fragmentShaderSource = R"(
     #version 330 core
     out vec4 FragColor;
     
-    flat in vec3 ourColor; // 2. Added 'flat' here
+    flat in vec3 ourColor;
 
     void main() {
         FragColor = vec4(ourColor, 1.0); 
@@ -46,7 +55,7 @@ int main() {
     GLFWwindow* window = glfwCreateWindow(
         800, //width
         600, //height
-        "multiple openGL triangles yipeeeee!",
+        "openGL cube yipeeeee!",
         nullptr,
         nullptr
     );
@@ -58,8 +67,10 @@ int main() {
         return 1;
     }
 
-    //make this window the current context
     glfwMakeContextCurrent(window);
+
+    //enable depth buffer
+    glEnable(GL_DEPTH_TEST);
 
     if (glewInit() != GLEW_OK) {
 
@@ -70,16 +81,77 @@ int main() {
     }
 
     float vertices[] = {
-        // Positions          // Colors (RGB)
-        // First Triangle (Red)
-        -0.5f,  0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 
-        -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f, 
-        0.5f, -0.5f, 0.0f,      0.0f, 0.0f, 1.0f, 
 
-        // Second Triangle (Blue)
-        -0.5f,  0.5f, 0.0f,     1.0f, 0.0f, 0.0f, 
-        0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f, 
-        0.5f, -0.5f, 0.0f,      1.0f, 0.0f, 0.0f  
+        // FRONT FACE
+        // Triangle 1
+        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+
+        // Triangle 2
+        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+
+
+        // BACK FACE
+        // Triangle 1
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+
+        // Triangle 2
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
+
+
+        // LEFT FACE
+        // Triangle 1
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+
+        // Triangle 2
+        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
+
+
+        // RIGHT FACE
+        // Triangle 1
+        0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
+
+        // Triangle 2
+        0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
+
+
+        // TOP FACE
+        // Triangle 1
+        -0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
+
+        // Triangle 2
+        -0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
+
+
+        // BOTTOM FACE
+        // Triangle 1
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f,
+
+        // Triangle 2
+        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f
     };
 
     //creat vertex array object (VAO)
@@ -113,9 +185,6 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    //enable the vertex attribute
-    glEnableVertexAttribArray(0);
-
     //create vertex shader
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -138,9 +207,38 @@ int main() {
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
 
-    //delete indicidual shaders
+    //delete individual shaders
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+
+    //create transformation matrices
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+
+    model = glm::rotate(
+        model,
+        glm::radians(25.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f)
+    );
+
+    model = glm::rotate(
+        model,
+        glm::radians(-35.0f),
+        glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    view = glm::translate(
+        view,
+        glm::vec3(0.0f, 0.0f, -3.0f)
+    );
+
+    projection = glm::perspective(
+        glm::radians(45.0f),
+        800.0f / 600.0f,
+        0.1f,
+        100.0f
+    );
 
     //main render loop
     while (!glfwWindowShouldClose(window)) {
@@ -148,16 +246,42 @@ int main() {
         //check for poll events
         glfwPollEvents();
 
-        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //use shader program
         glUseProgram(shaderProgram);
 
-        //draw triangle
+        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
+
+        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
+
+        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+
+        glUniformMatrix4fv(
+            modelLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(model)
+        );
+
+        glUniformMatrix4fv(
+            viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(view)
+        );
+
+        glUniformMatrix4fv(
+            projectionLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(projection)
+        );
+
+        //draw cube
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //swap front and back buffers
         glfwSwapBuffers(window);
