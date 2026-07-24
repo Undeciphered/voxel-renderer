@@ -1,42 +1,12 @@
-#include <GL/glew.h>
+#include "shader.h"
+#include "cube.h"
+
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include <chrono>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-//vertex shader
-const char* vertexShaderSource = R"(
-    #version 330 core
-
-    layout (location = 0) in vec3 aPos;
-    layout (location = 1) in vec3 aColor;
-
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
-
-    flat out vec3 ourColor;
-
-    void main() {
-        gl_Position = projection * view * model * vec4(aPos, 1.0);
-        ourColor = aColor;
-    }
-)";
-
-//fragment shader
-const char* fragmentShaderSource = R"(
-    #version 330 core
-    out vec4 FragColor;
-    
-    flat in vec3 ourColor;
-
-    void main() {
-        FragColor = vec4(ourColor, 1.0); 
-    }
-)";
 
 int main() {
 
@@ -70,90 +40,17 @@ int main() {
 
     glfwMakeContextCurrent(window);
 
-    //enable depth buffer
-    glEnable(GL_DEPTH_TEST);
-
     if (glewInit() != GLEW_OK) {
-
         std::cerr << "Failed to initialize GLEW\n";
         glfwDestroyWindow(window);
         glfwTerminate();
         return 1;
     }
 
-    float vertices[] = {
+    //enable depth buffer
+    glEnable(GL_DEPTH_TEST);
 
-        // FRONT FACE
-        // Triangle 1
-        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-
-
-        // BACK FACE
-        // Triangle 1
-        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,
-
-
-        // LEFT FACE
-        // Triangle 1
-        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
-
-
-        // RIGHT FACE
-        // Triangle 1
-        0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
-
-        // Triangle 2
-        0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,
-
-
-        // TOP FACE
-        // Triangle 1
-        -0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
-
-        // Triangle 2
-        -0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 1.0f,
-
-
-        // BOTTOM FACE
-        // Triangle 1
-        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f,
-
-        // Triangle 2
-        -0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 1.0f
-    };
+    std::vector<float> vertices = createCube();
 
     //creat vertex array object (VAO)
     unsigned int VAO;
@@ -172,8 +69,8 @@ int main() {
     //copy our vertices into the GPU
     glBufferData(
         GL_ARRAY_BUFFER,
-        sizeof(vertices),
-        vertices,
+        vertices.size() * sizeof(float),
+        vertices.data(),
         GL_STATIC_DRAW
     );
 
@@ -186,31 +83,12 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    //create vertex shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-
-    //create fragment shader
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-
-    //create shader program
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    //delete individual shaders
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    unsigned int shaderProgram = createShaderProgram();
+    
+    //get uniform locations
+    int modelLoc = glGetUniformLocation(shaderProgram, "model");
+    int viewLoc = glGetUniformLocation(shaderProgram, "view");
+    int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
 
     //create transformation matrices
     glm::mat4 model = glm::mat4(1.0f);
@@ -260,12 +138,6 @@ int main() {
         //use shader program
         glUseProgram(shaderProgram);
 
-        unsigned int modelLoc = glGetUniformLocation(shaderProgram, "model");
-
-        unsigned int viewLoc = glGetUniformLocation(shaderProgram, "view");
-
-        unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-
         glUniformMatrix4fv(
             modelLoc,
             1,
@@ -289,7 +161,7 @@ int main() {
 
         //draw cube
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, vertices.size() / 6);
 
         //swap front and back buffers
         glfwSwapBuffers(window);

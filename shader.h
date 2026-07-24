@@ -1,0 +1,6 @@
+#pragma once
+
+#include <GL/glew.h>
+#include <iostream>
+
+unsigned int createShaderProgram();
